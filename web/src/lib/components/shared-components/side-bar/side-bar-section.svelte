@@ -4,7 +4,7 @@
   import { menuButtonId } from '$lib/components/shared-components/navigation-bar/navigation-bar.svelte';
   import { mobileDevice } from '$lib/stores/mobile-device.svelte';
   import { isSidebarOpen } from '$lib/stores/side-bar.svelte';
-  import { onMount, type Snippet } from 'svelte';
+  import { type Snippet } from 'svelte';
 
   interface Props {
     children?: Snippet;
@@ -12,13 +12,13 @@
 
   let { children }: Props = $props();
 
-  onMount(() => {
-    closeSidebar();
-  });
-
-  const closeSidebar = () => {
-    isSidebarOpen.value = mobileDevice.isFullSidebar;
+  const setSidebarVisibility = (value: boolean) => {
+    isSidebarOpen.value = value;
   };
+
+  $effect(() => {
+    setSidebarVisibility(mobileDevice.isFullSidebar);
+  });
 
   const isHidden = $derived(!isSidebarOpen.value && !mobileDevice.isFullSidebar);
   const isExpanded = $derived(isSidebarOpen.value && !mobileDevice.isFullSidebar);
@@ -27,14 +27,13 @@
     if (!isSidebarOpen.value) {
       return;
     }
-    closeSidebar();
+    setSidebarVisibility(mobileDevice.isFullSidebar);
     if (isHidden) {
       document.querySelector<HTMLButtonElement>(`#${menuButtonId}`)?.focus();
     }
   };
 </script>
 
-<svelte:window onresize={closeSidebar} />
 <section
   tabindex="-1"
   class="immich-scrollbar relative z-10 w-0 sidebar:w-[16rem] overflow-y-auto overflow-x-hidden bg-immich-bg pt-8 transition-all duration-200 dark:bg-immich-dark-bg"
